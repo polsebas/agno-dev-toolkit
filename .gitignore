@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+.vscode/
+*.log
+
+# Milvus Database Volumes
+volumes/
+
+# RAG Cloned Repo Data
+data/

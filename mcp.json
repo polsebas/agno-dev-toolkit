@@ -1,0 +1,183 @@
+{
+    "tools": [
+        {
+            "name": "read_project_graph",
+            "description": "Lightweight scan of the project structure. Returns file paths and top-level symbols (classes/functions) without internal details to minimize context usage.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Root path of the project"
+                    },
+                    "focus": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "schemas",
+                                "agents",
+                                "tools"
+                            ]
+                        },
+                        "description": "Target directories to scan"
+                    },
+                    "depth": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 5,
+                        "default": 2
+                    }
+                },
+                "required": [
+                    "path"
+                ]
+            }
+        },
+        {
+            "name": "query_local_architecture",
+            "description": "Deep inspection of a specific local symbol (e.g. a Pydantic model). Returns exact code definition and dependencies.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "identifier": {
+                        "type": "string",
+                        "description": "Fully qualified name (e.g. schemas.user.UserSchema)"
+                    },
+                    "include_definition": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "compression": {
+                        "type": "string",
+                        "enum": [
+                            "none",
+                            "truncated",
+                            "summarized"
+                        ],
+                        "default": "none"
+                    }
+                },
+                "required": [
+                    "identifier"
+                ]
+            }
+        },
+        {
+            "name": "query_framework_knowledge",
+            "description": "Retrieve relevant Agno framework patterns from curated test-based RAG index, filtered by version.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Framework version or 'auto' to detect from project",
+                        "default": "auto"
+                    },
+                    "top_k": {
+                        "type": "integer",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 10
+                    },
+                    "min_score": {
+                        "type": "number",
+                        "default": 0.75
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": [
+                            "prototype",
+                            "balanced",
+                            "strict"
+                        ],
+                        "default": "balanced"
+                    }
+                },
+                "required": [
+                    "query"
+                ]
+            }
+        },
+        {
+            "name": "validate_architecture_basics",
+            "description": "Validate Python code against core architectural axioms (Pydantic usage, async compliance, no global state). Supports raw code or file-based validation.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Raw Python code"
+                    },
+                    "filepath": {
+                        "type": "string",
+                        "description": "Path to a Python file inside the workspace"
+                    },
+                    "range": {
+                        "type": "object",
+                        "properties": {
+                            "start_line": {
+                                "type": "integer"
+                            },
+                            "end_line": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": [
+                            "prototype",
+                            "strict"
+                        ],
+                        "default": "prototype"
+                    }
+                },
+                "oneOf": [
+                    {
+                        "required": [
+                            "code"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "filepath"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "name": "explain_validation_failure",
+            "description": "Provide detailed explanations and fix patterns for validation issues returned by the architecture validator.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "issues": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "rule": {
+                                    "type": "string"
+                                },
+                                "line": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "rule"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "issues"
+                ]
+            }
+        }
+    ]
+}
