@@ -65,6 +65,7 @@ async def mcp_endpoint(request: Request):
 
     try:
         body = await request.json()
+        logger.info("MCP Request: %s", body)
 
         tool_name = body.get("tool")
         arguments = body.get("arguments", {})
@@ -75,7 +76,6 @@ async def mcp_endpoint(request: Request):
         if tool_name not in TOOL_REGISTRY:
             return _mcp_error(f"Unknown tool: {tool_name}")
 
-        logger.info("Dispatching tool: %s", tool_name)
         result = await dispatch_tool(tool_name, arguments)
 
         latency = int((time.time() - start_time) * 1000)

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "agno-dev-toolkit": {
+      "command": "python",
+      "args": ["-m", "mcp_server.stdio_transport"],
+      "cwd": "/path/to/agno-dev-toolkit"
+    }
+  }
+}

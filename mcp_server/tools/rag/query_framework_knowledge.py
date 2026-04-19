@@ -1,12 +1,15 @@
 import logging
 
+from config.settings import settings
+
 logger = logging.getLogger("mcp.tool.query_framework_knowledge")
 
 
 async def run(args: dict) -> dict:
     """
     Retrieve relevant Agno framework patterns from curated test-based
-    RAG index backed by Milvus, with graceful degradation.
+    RAG index, with graceful degradation. Supports both ChromaDB and Milvus
+    backends via the factory.
     """
     query = args.get("query")
 
@@ -14,24 +17,24 @@ async def run(args: dict) -> dict:
         return _error("INVALID_INPUT", "Provide 'query' to search for.")
 
     top_k = args.get("top_k", 5)
-    min_score = args.get("min_score", 0.75)
+    min_score = args.get("min_score", 0.50)
     version = args.get("version", "auto")
 
     try:
-        from rag.storage.milvus_client import MilvusClient
+        from rag.storage.factory import get_vector_store
+        from rag.ingestion.embedder import embed
 
-        client = MilvusClient()
-        raw_results = client.similarity_search(query=query, limit=top_k)
+        store = get_vector_store()
+        store.connect()
+        store.create_collection()
 
-        # Filter by min_score (Milvus returns L2 distance — lower is better)
-        # Convert L2 distance to a similarity score: score = 1 / (1 + distance)
-        results = []
-        for hit in raw_results:
-            distance = hit.get("distance", float("inf"))
-            score = 1.0 / (1.0 + distance)
-            if score >= min_score:
-                hit["score"] = round(score, 4)
-                results.append(hit)
+        # Embed the query
+        query_vector = embed([query])[0]
+
+        # Search using the abstract interface
+        results = store.search(
+            query_vector=query_vector, top_k=top_k, min_score=min_score
+        )
 
         return {
             "success": True,
@@ -41,7 +44,7 @@ async def run(args: dict) -> dict:
             },
             "error": None,
             "meta": {
-                "storage": "milvus",
+                "storage": settings.vector_backend,
                 "result_count": len(results),
                 "top_k": top_k,
                 "min_score": min_score,
@@ -50,22 +53,21 @@ async def run(args: dict) -> dict:
         }
 
     except ImportError as e:
-        logger.warning("Milvus dependencies not installed: %s", e)
+        logger.warning("Vector store dependencies not installed: %s", e)
         return _error(
-            "MILVUS_UNAVAILABLE",
-            f"Milvus dependencies are not installed: {e}. "
-            "Install pymilvus and sentence-transformers to enable RAG.",
+            "VECTOR_STORE_UNAVAILABLE",
+            f"Vector store dependencies are not installed: {e}. "
+            f"Install the required packages for '{settings.vector_backend}' backend.",
         )
     except ConnectionError as e:
-        logger.warning("Milvus connection failed: %s", e)
+        logger.warning("Vector store connection failed: %s", e)
         return _error(
-            "MILVUS_CONNECTION_ERROR",
-            f"Cannot connect to Milvus: {e}. "
-            "Ensure the Milvus container is running (docker compose up -d).",
+            "VECTOR_STORE_CONNECTION_ERROR",
+            f"Cannot connect to vector store: {e}.",
         )
     except Exception as e:
         logger.exception("Error in query_framework_knowledge")
-        return _error("MILVUS_ERROR", str(e))
+        return _error("VECTOR_STORE_ERROR", str(e))
 
 
 def _error(code: str, message: str) -> dict:
