@@ -162,4 +162,12 @@ async def main():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--help":
+        print("Agno Dev Toolkit MCP Server")
+        print("\nAvailable tools:")
+        schemas = _load_tool_schemas()
+        for name in TOOL_REGISTRY:
+            desc = schemas.get(name, {}).get("description", "No description")
+            print(f" - {name}: {desc}")
+        sys.exit(0)
     asyncio.run(main())

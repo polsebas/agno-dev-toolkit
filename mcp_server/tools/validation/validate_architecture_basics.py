@@ -17,34 +17,28 @@ async def run(args: dict):
             with open(filepath, "r") as f:
                 code = f.read()
 
-        tree = ast.parse(code)
-
+        from validation.engine.validator import ValidationEngine
+        engine = ValidationEngine()
+        
+        raw_issues = engine.validate(code)
         issues = []
-
-        for node in ast.walk(tree):
-            # Detect dict usage
-            if isinstance(node, ast.Dict):
-                issues.append({
-                    "type": "WARNING" if mode == "prototype" else "CRITICAL",
-                    "rule": "PYDANTIC_REQUIRED",
-                    "message": "Dict detected. Use Pydantic BaseModel.",
-                    "line": getattr(node, "lineno", None)
-                })
-
-            # Detect sync sleep
-            if isinstance(node, ast.Call):
-                if hasattr(node.func, "attr") and node.func.attr == "sleep":
-                    issues.append({
-                        "type": "CRITICAL",
-                        "rule": "ASYNC_REQUIRED",
-                        "message": "time.sleep detected. Use asyncio.sleep.",
-                        "line": getattr(node, "lineno", None)
-                    })
+        
+        for issue in raw_issues:
+            if mode == "prototype" and issue.rule == "GLOBAL_STATE":
+                continue
+            issues.append({
+                "rule": issue.rule,
+                "severity": issue.severity,
+                "message": issue.message,
+                "detail": issue.detail,
+                "line": issue.line,
+                "fix_hint": issue.fix_hint
+            })
 
         return {
             "success": True,
             "data": {
-                "valid": len([i for i in issues if i["type"] == "CRITICAL"]) == 0,
+                "valid": len([i for i in issues if i["severity"] == "high"]) == 0,
                 "issues": issues
             },
             "error": None,

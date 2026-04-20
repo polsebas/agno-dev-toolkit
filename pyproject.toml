@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agno-dev-toolkit"
+version = "0.1.0"
+description = "MCP Server for Agno framework architecture validation and knowledge RAG."
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic>=2.0",
+    "pydantic-settings",
+    "python-dotenv",
+    "httpx",
+    "sentence-transformers",
+    "chromadb",
+    "mcp"
+]
+
+[project.scripts]
+agno-toolkit = "mcp_server.stdio_transport:main"
+
+[project.optional-dependencies]
+milvus = ["pymilvus>=2.4.0"]
+dev = ["pytest", "pytest-anyio", "httpx"]

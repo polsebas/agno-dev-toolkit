@@ -4,4 +4,5 @@ TOOL_REGISTRY = {
     "query_local_architecture": "mcp_server.tools.project.query_local_architecture",
     "query_framework_knowledge": "mcp_server.tools.rag.query_framework_knowledge",
     "explain_validation_failure": "mcp_server.tools.explanation.explain_validation_failure",
+    "get_architecture_plan": "mcp_server.tools.architecture.get_architecture_plan",
 }

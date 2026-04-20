@@ -178,6 +178,34 @@
                     "issues"
                 ]
             }
+        },
+        {
+            "name": "get_architecture_plan",
+            "description": "Returns a complete end-to-end architecture plan for building an Agno agent system. Covers the full stack: Agno SDK (agents, tools, memory), AgentOS (FastAPI serving, async runtime), Agno UI (playground, monitoring), MCP layer (IDE integration), and production infrastructure. Call this tool whenever a developer asks how to build, structure, or deploy an agent — before writing any code.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "use_case": {
+                        "type": "string",
+                        "description": "What the developer is building. Be specific: 'customer support agent with memory and escalation' not just 'agent'"
+                    },
+                    "layers": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Stack layers to include. Options: sdk, agent_os, agno_ui, mcp_layer, infra. Default: all layers.",
+                        "default": ["sdk", "agent_os", "agno_ui", "mcp_layer", "infra"]
+                    },
+                    "complexity": {
+                        "type": "string",
+                        "enum": ["simple", "production"],
+                        "default": "production",
+                        "description": "simple = local dev only. production = full stack with DB, serving, monitoring."
+                    }
+                },
+                "required": [
+                    "use_case"
+                ]
+            }
         }
     ]
 }

@@ -22,6 +22,12 @@ async def client(transport):
         yield ac
 
 
+@pytest.fixture
+def anyio_backend():
+    return 'asyncio'
+
+
+
 # ── Helper ──────────────────────────────────────────────────────────────────
 
 def _parse_mcp(response) -> dict:
@@ -42,7 +48,7 @@ async def test_health_returns_ok(client):
     data = resp.json()
     assert data["status"] == "ok"
     assert isinstance(data["tools"], list)
-    assert len(data["tools"]) == 5
+    assert len(data["tools"]) == 6
 
 
 @pytest.mark.anyio
@@ -310,3 +316,64 @@ async def test_mcp_response_format_on_success(client):
     assert "meta" in inner
     assert "latency_ms" in inner["meta"]
     assert "contract_version" in inner["meta"]
+
+
+# ── get_architecture_plan ───────────────────────────────────────────────────
+
+@pytest.mark.anyio
+async def test_get_architecture_plan_basic(client):
+    """Tool returns valid plan structure for a simple use case."""
+    resp = await client.post(
+        "/mcp",
+        json={
+            "tool": "get_architecture_plan",
+            "arguments": {
+                "use_case": "customer support agent with memory",
+                "complexity": "production",
+            },
+        },
+    )
+    inner, is_error = _parse_mcp(resp)
+    assert is_error is False
+    assert inner["success"] is True
+    plan = inner["data"]
+
+    # Structure checks
+    assert "stack_plan" in plan
+    assert "sdk" in plan["stack_plan"]
+    assert "implementation_order" in plan
+    assert "production_checklist" in plan
+    assert len(plan["production_checklist"]) > 0
+
+    # Semantic checks — memory keyword must be detected
+    assert "memory" in plan["detected_patterns"]
+    assert "PgAgentStorage" in str(plan["stack_plan"]["sdk"])
+
+    # Pattern selection
+    assert plan["recommended_agent_pattern"] in [
+        "ReAct", "Plan-and-Solve", "Router", "Swarm"
+    ]
+
+
+@pytest.mark.anyio
+async def test_get_architecture_plan_simple_complexity(client):
+    """Simple complexity strips infra and uses in-memory defaults."""
+    resp = await client.post(
+        "/mcp",
+        json={
+            "tool": "get_architecture_plan",
+            "arguments": {
+                "use_case": "quick prototype chatbot",
+                "complexity": "simple",
+            },
+        },
+    )
+    inner, is_error = _parse_mcp(resp)
+    assert is_error is False
+    assert inner["success"] is True
+    plan = inner["data"]
+    assert plan["complexity"] == "simple"
+    # Simple mode should NOT push PostgreSQL
+    assert "PgAgentStorage" not in str(
+        plan["stack_plan"].get("sdk", {})
+    )

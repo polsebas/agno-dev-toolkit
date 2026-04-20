@@ -1,7 +1,9 @@
+import asyncio
 import importlib
 import inspect
 import logging
 import time
+from config.settings import settings
 
 logger = logging.getLogger("mcp.dispatcher")
 
@@ -40,15 +42,34 @@ async def dispatch_tool(tool_name: str, arguments: dict) -> dict:
     # Execute the tool
     try:
         if inspect.iscoroutinefunction(run_fn):
-            result = await run_fn(arguments)
+            result = await asyncio.wait_for(
+                run_fn(arguments), timeout=settings.mcp_tool_timeout
+            )
         else:
-            result = run_fn(arguments)
+            loop = asyncio.get_event_loop()
+            result = await asyncio.wait_for(
+                loop.run_in_executor(None, run_fn, arguments),
+                timeout=settings.mcp_tool_timeout
+            )
 
         elapsed = int((time.time() - start) * 1000)
         logger.info("Tool '%s' completed in %dms (success=%s)",
                      tool_name, elapsed, result.get("success"))
         return result
 
+    except asyncio.TimeoutError:
+        elapsed = int((time.time() - start) * 1000)
+        logger.error("Tool '%s' timed out after %dms", tool_name, elapsed)
+        return {
+            "success": False,
+            "data": None,
+            "error": {
+                "code": "TOOL_TIMEOUT",
+                "message": f"Tool exceeded {settings.mcp_tool_timeout}s timeout",
+                "tool": tool_name
+            },
+            "meta": {}
+        }
     except Exception as e:
         elapsed = int((time.time() - start) * 1000)
         logger.error("Tool '%s' crashed after %dms: %s", tool_name, elapsed, e)

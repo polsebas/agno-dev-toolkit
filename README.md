@@ -1,53 +1,64 @@
 # Agno Dev Toolkit
 
-The **Agno Dev Toolkit** is an MCP (Model Context Protocol) server designed to enforce architectural compliance and inject real framework knowledge into LLM-driven development workflows. 
+MCP server that gives AI-assisted IDEs (Cursor, Claude Code) 
+deep knowledge of the Agno framework — so the LLM suggests 
+correct patterns instead of generic ones.
 
-It provides an awareness layer utilizing deep AST inspection and a vector-backed RAG infrastructure connected to the official framework tests.
+## Quickstart
 
-## Features
-
-- **MCP Tooling:** Exposes standard endpoints to interact with local code architecture and framework semantic searches.
-- **RAG over Framework Tests:** Uses intelligent chunking and AST distillation to safely embed tests as high-signal contextual examples.
-- **AST-Based Validation & Inspection:** Performs strict structural reviews (enforcing `BaseModel` and `async` logic) and explores local dependencies.
-- **Milvus Vector Store Integration:** Lightweight but robust integration using `sentence-transformers` to locate components instantly.
-
-## Available MCP Tools
-
-* `validate_architecture_basics`: Checks code snippets or files for specific architectural rules (e.g. usage of Pydantic and asyncio).
-* `read_project_graph`: Maps out the local Python project returning classes and types.
-* `query_local_architecture`: Targets a specific identifier (like `schemas.user.UserSchema`) and resolves its raw source code and base dependencies.
-* `query_framework_knowledge`: Triggers a semantic search in Milvus over the framework documentation logic.
-
-## Getting Started
-
-### 1. Environment Setup
-
-Ensure you are inside the virtual environment and all requirements are installed:
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+git clone <repo-url>
+cd agno-dev-toolkit
+./start.sh
 ```
 
-### 2. Run Milvus Vector Database
+That's it. `start.sh` sets up the venv, installs deps, 
+and indexes Agno's framework knowledge (~3 min first run).
+The script prints the exact MCP config to paste into your IDE.
 
-The RAG architecture requires a running Milvus stack. You can start it locally via Docker:
+## What it does
+
+Six tools the LLM uses automatically:
+
+| Tool | What it does |
+|------|-------------|
+| `get_architecture_plan` | Full-stack Agno architecture plan for your use case |
+| `validate_architecture_basics` | Detects anti-patterns: missing circuit breakers, blocking I/O, dict state |
+| `explain_validation_failure` | Explains any validation issue with fix patterns |
+| `query_framework_knowledge` | Semantic search over Agno's test suite |
+| `read_project_graph` | Maps your project's classes and functions |
+| `query_local_architecture` | Finds and returns any symbol definition in your project |
+
+## Try it
+
+Once connected, send these prompts in your IDE:
+- *"I want to build an Agno agent for customer support"*
+- *"Check this file for architecture issues"*
+- *"How should I structure an Agno project from scratch?"*
+
+## Requirements
+
+- Python 3.10+
+- Git (for cloning the Agno repo during setup)
+- No Docker required
+
+## Advanced: Milvus backend
+
+ChromaDB is the default (no Docker). 
+To use Milvus for larger deployments:
+
 ```bash
-wget https://github.com/milvus-io/milvus/releases/download/v2.4.17/milvus-standalone-docker-compose.yml -O milvus-compose.yaml
 docker compose -f milvus-compose.yaml up -d
+# Add to .env:
+VECTOR_BACKEND=milvus
 ```
 
-### 3. Ingest Framework Knowledge (RAG Pipeline)
+## Development
 
-Build the vector index by running the orchestrator. This clones the agno repository, extracts the AST from test scripts, eliminates noisy assertions, limits the chunk boundaries, and safely routes embeddings (`all-MiniLM-L6-v2`) inside Milvus.
 ```bash
-python -m rag.ingestion.pipeline
-```
+# Run tests
+PYTHONPATH=. pytest tests/test_mcp_integration.py -v
 
-### 4. Run the Server
-
-Finally, run the backend server bridging MCP with Fast API:
-```bash
+# HTTP server (for debugging with curl)
 bash scripts/run_server.sh
-# Alternatively: uvicorn mcp_server.server:app --reload --port 8000
 ```

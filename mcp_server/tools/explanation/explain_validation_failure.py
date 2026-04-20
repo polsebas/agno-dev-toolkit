@@ -87,6 +87,69 @@ RULE_EXPLANATIONS: Dict[str, Dict[str, Any]] = {
         "severity": "WARNING",
         "docs": "https://docs.python.org/3/library/typing.html",
     },
+    "GLOBAL_STATE": {
+        "title": "Avoid mutable global state",
+        "explanation": (
+            "Mutable global variables introduce hidden coupling between "
+            "agents and tools, making the system non-reproducible and "
+            "difficult to test or scale horizontally."
+        ),
+        "fix": (
+            "Move state into a dependency-injected context or "
+            "a Pydantic settings object.\n\n"
+            "Before:\n"
+            "  counter = 0  # module-level mutable\n\n"
+            "After:\n"
+            "  from pydantic_settings import BaseSettings\n\n"
+            "  class AppState(BaseSettings):\n"
+            "      counter: int = 0"
+        ),
+        "severity": "WARNING",
+        "docs": "https://docs.pydantic.dev/latest/concepts/pydantic_settings/",
+    },
+    "MISSING_TYPE_HINTS": {
+        "title": "Add type hints to function signatures",
+        "explanation": (
+            "Functions without type hints reduce LLM comprehension of "
+            "the codebase and prevent Pydantic from auto-generating "
+            "schemas for tool inputs/outputs."
+        ),
+        "fix": (
+            "Annotate all parameters and return types.\n\n"
+            "Before:\n"
+            "  def process(data):\n"
+            "      return data\n\n"
+            "After:\n"
+            "  def process(data: UserData) -> ProcessedResult:\n"
+            "      return ProcessedResult.from_raw(data)"
+        ),
+        "severity": "WARNING",
+        "docs": "https://docs.python.org/3/library/typing.html",
+    },
+    "MISSING_CIRCUIT_BREAKER": {
+        "title": "Missing circuit breaker (max_num_calls)",
+        "explanation": (
+            "Without max_num_calls, an agent can loop indefinitely consuming tokens. "
+            "This can lead to significant cost overruns and system instability if "
+            "the agent gets stuck in a tool invocation loop."
+        ),
+        "fix": (
+            "Add max_num_calls to your Agent instantiation.\n\n"
+            "Before:\n"
+            "  agent = Agent(instructions=\"...\")\n\n"
+            "After:\n"
+            "  agent = Agent(instructions=\"...\", max_num_calls=5)"
+        ),
+        "severity": "high",
+        "docs": "https://docs.agno.com/agents/introduction",
+    },
+    "PARSE_ERROR": {
+        "title": "Parse Error",
+        "explanation": "File could not be parsed, check syntax",
+        "fix": "Fix python syntax errors.",
+        "severity": "high",
+        "docs": None,
+    }
 }
 
 
