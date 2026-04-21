@@ -4,10 +4,13 @@ MCP server that gives AI-assisted IDEs (Cursor, Claude Code)
 deep knowledge of the Agno framework — so the LLM suggests 
 correct patterns instead of generic ones.
 
+![Demo](https://via.placeholder.com/800x450.png?text=Agno+Dev+Toolkit+in+Action)
+*Replace this with a 15-second demo GIF showing the LLM detecting architectural issues.*
+
 ## Quickstart
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/polsebas/agno-dev-toolkit.git
 cd agno-dev-toolkit
 ./start.sh
 ```
