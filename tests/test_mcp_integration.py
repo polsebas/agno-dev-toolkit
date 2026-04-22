@@ -48,7 +48,7 @@ async def test_health_returns_ok(client):
     data = resp.json()
     assert data["status"] == "ok"
     assert isinstance(data["tools"], list)
-    assert len(data["tools"]) == 6
+    assert len(data["tools"]) == 7
 
 
 @pytest.mark.anyio
