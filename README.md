@@ -40,6 +40,9 @@ Once connected, your IDE gains these capabilities:
 *   **`validate_architecture_basics`**: Scans your code for "Shadow Loops", missing circuit breakers, and state leaks.
 *   **`query_framework_knowledge`**: Semantic search specifically over Agno's implementation patterns.
 *   **`explain_validation_failure`**: Don't just get an error; get a diff-style fix you can apply immediately.
+*   **`read_project_graph`**: Scans the project structure to build a lightweight graph of files and top-level symbols.
+*   **`query_local_architecture`**: Performs deep inspection of specific local symbols (e.g., Pydantic models), providing exact code definition and dependencies.
+*   **`get_execution_traces`**: Retrieves real-time execution traces (SQLite-based) to capture and debug agent execution history.
 
 ## 🧪 Try it Out
 
@@ -47,6 +50,9 @@ Once setup, ask your IDE:
 - *"I want to build a support agent that escalates to human if sentiment is low."*
 - *"Check this agent file for potential infinite loops."*
 - *"How do I implement a custom vector store in Agno?"*
+- *"What are the dependencies of the `PgAgentStorage` model?"*
+- *"Analyze the project structure and show me the main agents we have."*
+- *"Show me the recent execution traces to find why the agent failed."*
 
 ## ⚙️ Requirements
 
