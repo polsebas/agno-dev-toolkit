@@ -32,7 +32,8 @@ async def run(args: dict):
                 "message": issue.message,
                 "detail": issue.detail,
                 "line": issue.line,
-                "fix_hint": issue.fix_hint
+                "fix_hint": issue.fix_hint,
+                "suggested_code": issue.suggested_code
             })
 
         return {
@@ -61,3 +62,31 @@ def _error(code, message):
         },
         "meta": {}
     }
+
+
+if __name__ == "__main__":
+    import argparse
+    import asyncio
+    import json
+    import sys
+
+    parser = argparse.ArgumentParser(description="Validate Agno architecture")
+    parser.add_argument("--file", help="Path to Python file")
+    parser.add_argument("--code", help="Raw Python code")
+    parser.add_argument("--mode", default="prototype", help="Validation mode (prototype|strict)")
+
+    args = parser.parse_args()
+    
+    run_args = {
+        "mode": args.mode
+    }
+    if args.file:
+        run_args["filepath"] = args.file
+    if args.code:
+        run_args["code"] = args.code
+
+    result = asyncio.run(run(run_args))
+    print(json.dumps(result, indent=2))
+    
+    if not result.get("success") or not result["data"].get("valid"):
+        sys.exit(1)

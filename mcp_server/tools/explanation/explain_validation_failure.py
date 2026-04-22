@@ -17,17 +17,15 @@ RULE_EXPLANATIONS: Dict[str, Dict[str, Any]] = {
         ),
         "fix": (
             "Replace dict literals with a Pydantic BaseModel subclass.\n\n"
-            "Before:\n"
-            "  data = {\"name\": \"Alice\", \"age\": 30}\n\n"
             "After:\n"
             "  from pydantic import BaseModel\n\n"
             "  class UserData(BaseModel):\n"
             "      name: str\n"
-            "      age: int\n\n"
-            "  data = UserData(name=\"Alice\", age=30)"
+            "      age: int"
         ),
-        "severity": "WARNING (prototype) / CRITICAL (strict)",
+        "severity": "WARNING",
         "docs": "https://docs.pydantic.dev/latest/concepts/models/",
+        "suggested_code": "class Result(BaseModel):\n    success: bool\n    message: str"
     },
     "ASYNC_REQUIRED": {
         "title": "Use asyncio.sleep instead of time.sleep",
@@ -36,112 +34,43 @@ RULE_EXPLANATIONS: Dict[str, Dict[str, Any]] = {
             "concurrent tasks. In an async agent framework this can "
             "cause timeouts, stalled pipelines, and resource starvation."
         ),
-        "fix": (
-            "Replace time.sleep with asyncio.sleep inside async functions.\n\n"
-            "Before:\n"
-            "  import time\n"
-            "  time.sleep(5)\n\n"
-            "After:\n"
-            "  import asyncio\n"
-            "  await asyncio.sleep(5)"
-        ),
+        "fix": "Replace time.sleep with asyncio.sleep inside async functions.",
         "severity": "CRITICAL",
         "docs": "https://docs.python.org/3/library/asyncio-task.html#sleeping",
+        "suggested_code": "import asyncio\nawait asyncio.sleep(1)"
     },
     "GLOBAL_STATE": {
         "title": "Avoid mutable global state",
         "explanation": (
             "Mutable global variables introduce hidden coupling between "
-            "agents and tools, making the system non-reproducible and "
-            "difficult to test or scale horizontally."
+            "agents and tools, making the system difficult to test or scale."
         ),
-        "fix": (
-            "Move state into a dependency-injected context or "
-            "a Pydantic settings object.\n\n"
-            "Before:\n"
-            "  counter = 0  # module-level mutable\n\n"
-            "After:\n"
-            "  from pydantic_settings import BaseSettings\n\n"
-            "  class AppState(BaseSettings):\n"
-            "      counter: int = 0"
-        ),
+        "fix": "Move state into a function context or a session-keyed store.",
         "severity": "WARNING",
-        "docs": "https://docs.pydantic.dev/latest/concepts/pydantic_settings/",
+        "docs": None,
+        "suggested_code": "def my_tool(ctx: MyContext):\n    ctx.state['key'] = value"
     },
-    "MISSING_TYPE_HINTS": {
-        "title": "Add type hints to function signatures",
+    "MISSING_TOOL_CALL_LIMIT": {
+        "title": "Missing circuit breaker (tool_call_limit)",
         "explanation": (
-            "Functions without type hints reduce LLM comprehension of "
-            "the codebase and prevent Pydantic from auto-generating "
-            "schemas for tool inputs/outputs."
+            "Without tool_call_limit, an agent can loop indefinitely consuming tokens. "
+            "This can lead to significant cost overruns and system instability."
         ),
-        "fix": (
-            "Annotate all parameters and return types.\n\n"
-            "Before:\n"
-            "  def process(data):\n"
-            "      return data\n\n"
-            "After:\n"
-            "  def process(data: UserData) -> ProcessedResult:\n"
-            "      return ProcessedResult.from_raw(data)"
-        ),
-        "severity": "WARNING",
-        "docs": "https://docs.python.org/3/library/typing.html",
-    },
-    "GLOBAL_STATE": {
-        "title": "Avoid mutable global state",
-        "explanation": (
-            "Mutable global variables introduce hidden coupling between "
-            "agents and tools, making the system non-reproducible and "
-            "difficult to test or scale horizontally."
-        ),
-        "fix": (
-            "Move state into a dependency-injected context or "
-            "a Pydantic settings object.\n\n"
-            "Before:\n"
-            "  counter = 0  # module-level mutable\n\n"
-            "After:\n"
-            "  from pydantic_settings import BaseSettings\n\n"
-            "  class AppState(BaseSettings):\n"
-            "      counter: int = 0"
-        ),
-        "severity": "WARNING",
-        "docs": "https://docs.pydantic.dev/latest/concepts/pydantic_settings/",
-    },
-    "MISSING_TYPE_HINTS": {
-        "title": "Add type hints to function signatures",
-        "explanation": (
-            "Functions without type hints reduce LLM comprehension of "
-            "the codebase and prevent Pydantic from auto-generating "
-            "schemas for tool inputs/outputs."
-        ),
-        "fix": (
-            "Annotate all parameters and return types.\n\n"
-            "Before:\n"
-            "  def process(data):\n"
-            "      return data\n\n"
-            "After:\n"
-            "  def process(data: UserData) -> ProcessedResult:\n"
-            "      return ProcessedResult.from_raw(data)"
-        ),
-        "severity": "WARNING",
-        "docs": "https://docs.python.org/3/library/typing.html",
-    },
-    "MISSING_CIRCUIT_BREAKER": {
-        "title": "Missing circuit breaker (max_num_calls)",
-        "explanation": (
-            "Without max_num_calls, an agent can loop indefinitely consuming tokens. "
-            "This can lead to significant cost overruns and system instability if "
-            "the agent gets stuck in a tool invocation loop."
-        ),
-        "fix": (
-            "Add max_num_calls to your Agent instantiation.\n\n"
-            "Before:\n"
-            "  agent = Agent(instructions=\"...\")\n\n"
-            "After:\n"
-            "  agent = Agent(instructions=\"...\", max_num_calls=5)"
-        ),
+        "fix": "Add tool_call_limit to your Agent instantiation.",
         "severity": "high",
         "docs": "https://docs.agno.com/agents/introduction",
+        "suggested_code": "agent = Agent(\n    ...,\n    tool_call_limit=10\n)"
+    },
+    "TOOL_DESIGN_QUALITY": {
+        "title": "Poor tool design (missing docs/hints)",
+        "explanation": (
+            "Tools without docstrings or type hints prevent the Agent "
+            "from understanding how to use them correctly."
+        ),
+        "fix": "Add descriptive docstrings and Python type hints to all arguments.",
+        "severity": "medium",
+        "docs": "https://docs.agno.com/agents/tools",
+        "suggested_code": "def my_tool(param: str) -> str:\n    \"\"\"Does something useful.\"\"\"\n    return param"
     },
     "PARSE_ERROR": {
         "title": "Parse Error",
@@ -151,6 +80,7 @@ RULE_EXPLANATIONS: Dict[str, Dict[str, Any]] = {
         "docs": None,
     }
 }
+
 
 
 async def run(args: dict) -> dict:
@@ -185,6 +115,7 @@ async def run(args: dict) -> dict:
                 "fix": info["fix"],
                 "severity": info["severity"],
                 "docs": info["docs"],
+                "suggested_code": info.get("suggested_code")
             }
         else:
             entry = {

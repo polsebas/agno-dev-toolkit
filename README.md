@@ -1,13 +1,16 @@
-# Agno Dev Toolkit
+# 🛡️ Agno Dev Toolkit
 
-MCP server that gives AI-assisted IDEs (Cursor, Claude Code) 
-deep knowledge of the Agno framework — so the LLM suggests 
-correct patterns instead of generic ones.
+**Validate, Debug, and Optimize Agno Agent Systems.**
+
+Generic AI assistants (ChatGPT, Claude) are great at writing code, but they don't know your specific architecture rules. They'll happily suggest patterns that lead to infinite loops, unhandled edge cases, or "hallucinated" Agno tools.
+
+Agno Dev Toolkit is an MCP server that turns your IDE into an **Agno Expert**. It doesn't just suggest code; it validatess your architecture against real-world Agno patterns and helps you build production-grade agent systems.
 
 ![Demo](https://via.placeholder.com/800x450.png?text=Agno+Dev+Toolkit+in+Action)
-*Replace this with a 15-second demo GIF showing the LLM detecting architectural issues.*
 
-## Quickstart
+## 🚀 Quickstart (3 Minutes)
+
+Zero config. Zero Docker. Just clone and run.
 
 ```bash
 git clone https://github.com/polsebas/agno-dev-toolkit.git
@@ -15,53 +18,43 @@ cd agno-dev-toolkit
 ./start.sh
 ```
 
-That's it. `start.sh` sets up the venv, installs deps, 
-and indexes Agno's framework knowledge (~3 min first run).
-The script prints the exact MCP config to paste into your IDE.
+`start.sh` will:
+1.  Set up a isolated Python environment.
+2.  Index the latest Agno framework knowledge (via RAG over Agno's internal test suite).
+3.  Provide the exact JSON to paste into your IDE (Cursor, Claude Desktop, VS Code).
 
-## What it does
+## 🧠 Why use this?
 
-Six tools the LLM uses automatically:
+| Feature | Generic LLM | Agno Dev Toolkit |
+|---------|-------------|------------------|
+| **Framework Knowledge** | May use outdated APIs | Grounded in Agno's latest test suite |
+| **Safety** | Suggests loops & infinite logic | Detects missing `tool_call_limit` |
+| **Observability** | Guessing | Real-time SQLite-based execution traces |
+| **Architecture** | "Single file" scripts | Production-grade multi-agent patterns |
 
-| Tool | What it does |
-|------|-------------|
-| `get_architecture_plan` | Full-stack Agno architecture plan for your use case |
-| `validate_architecture_basics` | Detects anti-patterns: missing circuit breakers, blocking I/O, dict state |
-| `explain_validation_failure` | Explains any validation issue with fix patterns |
-| `query_framework_knowledge` | Semantic search over Agno's test suite |
-| `read_project_graph` | Maps your project's classes and functions |
-| `query_local_architecture` | Finds and returns any symbol definition in your project |
+## 🛠️ The Toolkit
 
-## Try it
+Once connected, your IDE gains these capabilities:
 
-Once connected, send these prompts in your IDE:
-- *"I want to build an Agno agent for customer support"*
-- *"Check this file for architecture issues"*
-- *"How should I structure an Agno project from scratch?"*
+*   **`get_architecture_plan`**: Generates a full-stack plan for your agent use case.
+*   **`validate_architecture_basics`**: Scans your code for "Shadow Loops", missing circuit breakers, and state leaks.
+*   **`query_framework_knowledge`**: Semantic search specifically over Agno's implementation patterns.
+*   **`explain_validation_failure`**: Don't just get an error; get a diff-style fix you can apply immediately.
 
-## Requirements
+## 🧪 Try it Out
+
+Once setup, ask your IDE:
+- *"I want to build a support agent that escalates to human if sentiment is low."*
+- *"Check this agent file for potential infinite loops."*
+- *"How do I implement a custom vector store in Agno?"*
+
+## ⚙️ Requirements
 
 - Python 3.10+
-- Git (for cloning the Agno repo during setup)
-- No Docker required
+- `git`
+- (Optional) Docker only if you want the Milvus backend.
 
-## Advanced: Milvus backend
+## 🤝 Contributing
 
-ChromaDB is the default (no Docker). 
-To use Milvus for larger deployments:
+This is an emerging framework. If you find an anti-pattern we're missing, open a PR in `validation/rules/`.
 
-```bash
-docker compose -f milvus-compose.yaml up -d
-# Add to .env:
-VECTOR_BACKEND=milvus
-```
-
-## Development
-
-```bash
-# Run tests
-PYTHONPATH=. pytest tests/test_mcp_integration.py -v
-
-# HTTP server (for debugging with curl)
-bash scripts/run_server.sh
-```

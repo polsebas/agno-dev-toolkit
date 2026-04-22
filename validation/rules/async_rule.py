@@ -23,7 +23,8 @@ class AsyncBlockingRule(ValidationRule):
                         severity=self.severity,
                         message="time.sleep() blocks the async event loop",
                         detail="In an async context, time.sleep() freezes all concurrent requests. Use await asyncio.sleep() instead.",
-                        line=getattr(node, "lineno", None),
-                        fix_hint="await asyncio.sleep(seconds)"
+                        line=node.lineno,
+                        fix_hint="await asyncio.sleep(seconds)",
+                        suggested_code="import asyncio\nawait asyncio.sleep(1)"
                     ))
         return issues

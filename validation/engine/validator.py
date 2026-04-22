@@ -24,6 +24,7 @@ class ValidationIssue:
     detail: str
     line: Optional[int] = None
     fix_hint: Optional[str] = None
+    suggested_code: Optional[str] = None
 
 
 class ValidationRule(ABC):

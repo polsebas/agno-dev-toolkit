@@ -16,7 +16,8 @@ class PydanticStateRule(ValidationRule):
                         severity=self.severity,
                         message="Raw dict used for state — use Pydantic BaseModel",
                         detail="Dict state fails silently on typos. Define a BaseModel with typed fields instead.",
-                        line=getattr(node.targets[0], "lineno", None) if node.targets else getattr(node, "lineno", None),
-                        fix_hint="class MyState(BaseModel):\n    field: str"
+                        line=node.lineno,
+                        fix_hint="class MyState(BaseModel):\n    field: str",
+                        suggested_code="from pydantic import BaseModel\n\nclass State(BaseModel):\n    # Add typed fields here\n    pass"
                     ))
         return issues
