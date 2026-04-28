@@ -8,7 +8,8 @@
                 "properties": {
                     "path": {
                         "type": "string",
-                        "description": "Root path of the project"
+                        "description": "Root path of the project",
+                        "default": "."
                     },
                     "focus": {
                         "type": "array",
@@ -27,11 +28,13 @@
                         "minimum": 1,
                         "maximum": 5,
                         "default": 2
+                    },
+                    "include_dependencies": {
+                        "type": "boolean",
+                        "description": "When true, build and return the full cross-reference dependency graph (nodes + edges)",
+                        "default": false
                     }
-                },
-                "required": [
-                    "path"
-                ]
+                }
             }
         },
         {
@@ -43,6 +46,11 @@
                     "identifier": {
                         "type": "string",
                         "description": "Fully qualified name (e.g. schemas.user.UserSchema)"
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Root path of the project to search in",
+                        "default": "."
                     },
                     "include_definition": {
                         "type": "boolean",

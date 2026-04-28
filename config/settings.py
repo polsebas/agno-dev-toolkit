@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Literal
+from typing import Literal, Optional
 
 
 class Settings(BaseSettings):
@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     mcp_tool_timeout: int = 30
     log_level: str = "INFO"
     ingest_docs: bool = False
+    hf_token: Optional[str] = None
 
     class Config:
         env_file = ".env"

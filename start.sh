@@ -51,6 +51,13 @@ echo -e "${GREEN}✓ Dependencies installed${NC}"
 
 # 4. RAG ingestion
 echo -e "\n${YELLOW}[4/4] Indexing Agno framework knowledge...${NC}"
+
+# Check for HF_TOKEN to warn about rate limits
+if ! grep -q "^HF_TOKEN=" .env 2>/dev/null && [ -z "$HF_TOKEN" ]; then
+    echo -e "${YELLOW}Notice: HF_TOKEN is not set. You may see a warning about unauthenticated requests to the Hugging Face Hub.${NC}"
+    echo -e "        ${YELLOW}To fix this, add your token to the .env file (see .env for details).${NC}"
+fi
+
 DATA_DIR="data/chroma_db"
 if [ -d "$DATA_DIR" ] && [ "$(ls -A $DATA_DIR 2>/dev/null)" ]; then
     echo -e "${GREEN}✓ Knowledge base already indexed — skipping${NC}"
