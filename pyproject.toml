@@ -16,7 +16,9 @@ dependencies = [
     "httpx",
     "sentence-transformers",
     "chromadb",
-    "mcp"
+    "mcp",
+    "tree-sitter>=0.22",
+    "tree-sitter-python>=0.22",
 ]
 
 [project.scripts]
@@ -27,4 +29,4 @@ milvus = ["pymilvus>=2.4.0"]
 dev = ["pytest", "pytest-anyio", "httpx"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["mcp_server", "rag", "config", "validation"]
+packages = ["mcp_server", "rag", "config", "validation", "analysis"]

@@ -1,4 +1,25 @@
+"""
+chunker.py — Legacy line-based chunker.
+
+chunk_code() is DEPRECATED. Use analysis.ast.semantic_chunker.SemanticChunker instead.
+chunk_docs() is still the canonical way to chunk Markdown documentation files.
+"""
+import warnings
+
+
 def chunk_code(snippet: str, context: dict = None, max_lines=60):
+    """
+    DEPRECATED: Use SemanticChunker.chunk_source() for Python source code.
+
+    This shim is kept for backward compatibility only.
+    """
+    warnings.warn(
+        "chunk_code() is deprecated. Use analysis.ast.semantic_chunker.SemanticChunker instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    # --- original implementation below ---
+
     context = context or {}
     class_name = context.get("class_name")
     setup_code = context.get("setup_code")

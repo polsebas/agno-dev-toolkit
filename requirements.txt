@@ -7,5 +7,7 @@ httpx
 sentence-transformers
 chromadb
 mcp
+tree-sitter>=0.22
+tree-sitter-python>=0.22
 
 # For Milvus users, run: pip install -e ".[milvus]"
