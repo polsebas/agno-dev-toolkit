@@ -30,3 +30,7 @@ dev = ["pytest", "pytest-anyio", "httpx"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["mcp_server", "rag", "config", "validation", "analysis"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".git", ".venv", "data"]
